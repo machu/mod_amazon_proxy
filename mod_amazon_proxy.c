@@ -1,5 +1,5 @@
 /* 
-**  mod_amazon_proxy.c -- Apache sample amazon_proxy module
+**  mod_amazon_proxy.c -- amazon auth proxy for PAAPI
 **
 **    #   httpd.conf
 **    LoadModule amazon_proxy_module modules/mod_amazon_proxy.so
@@ -73,6 +73,13 @@ static char* create_timestamp(apr_pool_t *p)
     return timestamp;
 }
 
+static char* url_encode(apr_pool_t *p, char *src)
+{
+    char *dest = apr_pcalloc(p, sizeof(char) * strlen(src) * 3 + 1);
+    apreq_encode(dest, src, strlen(src));
+    return dest;
+}
+
 static char* array_join(apr_pool_t *p, apr_array_header_t *array, char *delimiter)
 {
     int i;
@@ -101,22 +108,22 @@ static apr_array_header_t* canonical(apr_pool_t *p, apr_table_t *param, const ch
         char *val = entries[i].val;
         if (strncmp(key, "AWSAccessKeyId", 14) == 0 || strncmp(key, "SubscriptionId", 14) == 0) {
             *(char **)apr_array_push(queries) = 
-                (char *)apr_pstrcat(p, key, "=", ap_escape_uri(p, access_key), NULL);
+                (char *)apr_pstrcat(p, key, "=", url_encode(p, access_key), NULL);
         } else if (strncmp(key, "Timestamp", 9) == 0) {
             // ignore this key
         } else {
             *(char **)apr_array_push(queries) = 
-                (char *)apr_pstrcat(p, ap_escape_uri(p, key), "=", ap_escape_uri(p, val), NULL);
+                (char *)apr_pstrcat(p, url_encode(p, key), "=", url_encode(p, val), NULL);
         }
     }
     // add assticate tag
     if (!apr_table_get(param, "AssociateTag") && aid) {
         *(char **)apr_array_push(queries) =
-            (char *)apr_pstrcat(p, "AssociateTag=", ap_escape_uri(p, aid), NULL);
+            (char *)apr_pstrcat(p, "AssociateTag=", url_encode(p, aid), NULL);
     }
     // add timestamp
     *(char **)apr_array_push(queries) =
-        (char *)apr_pstrcat(p, "Timestamp=", ap_escape_uri(p, create_timestamp(p)), NULL);
+        (char *)apr_pstrcat(p, "Timestamp=", url_encode(p, create_timestamp(p)), NULL);
 
     return queries;
 }
@@ -162,12 +169,14 @@ static int amazon_proxy_handler(request_rec *r)
     char *query = array_join(r->pool, params, "&");
     char *path = "/onca/xml";
     char *message = create_message(r->pool, host, path, query);
+
+    ap_rprintf(r, "message: %s\n", message);
     char *signature = sign(r->pool, conf->secret_key, message);
-    ap_rprintf(r, "query: %s\n", query);
+    query = (char *)apr_pstrcat(r->pool, query, "&Signature=", url_encode(r->pool, signature), NULL);
+    // ap_rprintf(r, "query: %s\n", query);
 
     // create redirect url
     char *url = (char *)apr_pstrcat(r->pool, "http://", host, path, "?", query, NULL);
-    ap_rprintf(r, "url: %s\n", url);
     apr_table_setn(r->headers_out, "Location", url);
     return HTTP_MOVED_TEMPORARILY;
 }
