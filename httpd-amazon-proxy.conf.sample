@@ -1,0 +1,10 @@
+LoadModule apreq_module modules/mod_apreq2.so
+LoadModule amazon_proxy_module modules/mod_amazon_proxy.so
+
+<Location /amazon_proxy/ja>
+	AmazonAccessKey your_access_key
+	AmazonSecretKey your_secret_key
+	# AmazonDefaultAid your_aid
+	AmazonEndPoint webservices.amazon.co.jp
+  SetHandler amazon_proxy
+</Location>
