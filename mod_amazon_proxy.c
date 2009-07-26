@@ -133,7 +133,7 @@ static int amazon_proxy_handler(request_rec *r)
     if (strcmp(r->handler, "amazon_proxy")) {
         return DECLINED;
     }
-    r->content_type = "text/plain";
+    // r->content_type = "text/plain";
 
     amazon_proxy_dir_config *conf = ap_get_module_config(r->per_dir_config, &amazon_proxy_module);
     const char *access_key = conf->access_key;
@@ -169,11 +169,8 @@ static int amazon_proxy_handler(request_rec *r)
     char *query = array_join(r->pool, params, "&");
     char *path = "/onca/xml";
     char *message = create_message(r->pool, host, path, query);
-
-    ap_rprintf(r, "message: %s\n", message);
     char *signature = sign(r->pool, conf->secret_key, message);
     query = (char *)apr_pstrcat(r->pool, query, "&Signature=", url_encode(r->pool, signature), NULL);
-    // ap_rprintf(r, "query: %s\n", query);
 
     // create redirect url
     char *url = (char *)apr_pstrcat(r->pool, "http://", host, path, "?", query, NULL);
