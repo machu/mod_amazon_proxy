@@ -1,0 +1,11 @@
+# === Your amazon-auth-proxy name
+name: your_proxy_name
+
+# === Support Locales
+locales:
+ - jp
+ - us
+ - ca
+ - de
+ - fr
+ - uk
