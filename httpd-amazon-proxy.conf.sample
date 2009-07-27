@@ -1,10 +1,50 @@
 LoadModule apreq_module modules/mod_apreq2.so
 LoadModule amazon_proxy_module modules/mod_amazon_proxy.so
 
-<Location /amazon_proxy/ja>
+<Location /amazon_proxy/ca>
 	AmazonAccessKey your_access_key
 	AmazonSecretKey your_secret_key
 	# AmazonDefaultAid your_aid_if_you_want  # optional
-	AmazonEndPoint webservices.amazon.co.jp
-  SetHandler amazon_proxy
+	AmazonEndPoint ecs.amazonaws.ca
+	SetHandler amazon_proxy
+</Location>
+
+<Location /amazon_proxy/de>
+	AmazonAccessKey your_access_key
+	AmazonSecretKey your_secret_key
+	# AmazonDefaultAid your_aid_if_you_want  # optional
+	AmazonEndPoint ecs.amazonaws.de
+	SetHandler amazon_proxy
+</Location>
+
+<Location /amazon_proxy/fr>
+	AmazonAccessKey your_access_key
+	AmazonSecretKey your_secret_key
+	# AmazonDefaultAid your_aid_if_you_want  # optional
+	AmazonEndPoint ecs.amazonaws.fr
+	SetHandler amazon_proxy
+</Location>
+
+<Location /amazon_proxy/jp>
+	AmazonAccessKey your_access_key
+	AmazonSecretKey your_secret_key
+	# AmazonDefaultAid your_aid_if_you_want  # optional
+	AmazonEndPoint ecs.amazonaws.jp
+	SetHandler amazon_proxy
+</Location>
+
+<Location /amazon_proxy/uk>
+	AmazonAccessKey your_access_key
+	AmazonSecretKey your_secret_key
+	# AmazonDefaultAid your_aid_if_you_want  # optional
+	AmazonEndPoint ecs.amazonaws.co.uk
+	SetHandler amazon_proxy
+</Location>
+
+<Location /amazon_proxy/us>
+	AmazonAccessKey your_access_key
+	AmazonSecretKey your_secret_key
+	# AmazonDefaultAid your_aid_if_you_want  # optional
+	AmazonEndPoint ecs.amazonaws.com
+	SetHandler amazon_proxy
 </Location>
