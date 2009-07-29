@@ -31,6 +31,7 @@ typedef struct {
     const char *secret_key;
     const char *default_aid;
     const char *endpoint;
+    const char *xslt_endpoint;
 } amazon_proxy_dir_config;
 
 module AP_MODULE_DECLARE_DATA amazon_proxy_module;
@@ -108,7 +109,7 @@ static apr_array_header_t* canonical(apr_pool_t *p, apr_table_t *param, const ch
         char *val = entries[i].val;
         if (strncmp(key, "AWSAccessKeyId", 14) == 0 || strncmp(key, "SubscriptionId", 14) == 0) {
             *(char **)apr_array_push(queries) = 
-                (char *)apr_pstrcat(p, key, "=", url_encode(p, access_key), NULL);
+                (char *)apr_pstrcat(p, key, "=", url_encode(p, (char *)access_key), NULL);
         } else if (strncmp(key, "Timestamp", 9) == 0) {
             // ignore this key
         } else {
@@ -119,7 +120,7 @@ static apr_array_header_t* canonical(apr_pool_t *p, apr_table_t *param, const ch
     // add assticate tag
     if (!apr_table_get(param, "AssociateTag") && aid) {
         *(char **)apr_array_push(queries) =
-            (char *)apr_pstrcat(p, "AssociateTag=", url_encode(p, aid), NULL);
+            (char *)apr_pstrcat(p, "AssociateTag=", url_encode(p, (char *)aid), NULL);
     }
     // add timestamp
     *(char **)apr_array_push(queries) =
@@ -139,7 +140,8 @@ static int amazon_proxy_handler(request_rec *r)
     const char *access_key = conf->access_key;
     const char *secret_key = conf->secret_key;
     const char *default_aid = conf->default_aid;
-    const char *host = conf->endpoint;
+    const char *api_host = conf->endpoint;
+    const char *xslt_host = conf->xslt_endpoint;
 
     // validate httpd.conf
     if (!access_key) {
@@ -152,9 +154,14 @@ static int amazon_proxy_handler(request_rec *r)
                 "not found AmazonSecretKey in httpd.conf");
         return HTTP_INTERNAL_SERVER_ERROR;
     }
-    if (!host) {
+    if (!api_host) {
         ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
                 "not found AmazonEndPoint in httpd.conf");
+        return HTTP_INTERNAL_SERVER_ERROR;
+    }
+    if (!xslt_host) {
+        ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r,
+                "not found AmazonXsltEndPoint in httpd.conf");
         return HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -168,6 +175,8 @@ static int amazon_proxy_handler(request_rec *r)
     // create message and sign
     char *query = array_join(r->pool, params, "&");
     char *path = "/onca/xml";
+    const char *host = (strlen(apreq_params_as_string(r->pool, param, "Style", APREQ_JOIN_AS_IS)) == 0) ?
+        api_host : xslt_host;
     char *message = create_message(r->pool, host, path, query);
     char *signature = sign(r->pool, conf->secret_key, message);
     query = (char *)apr_pstrcat(r->pool, query, "&Signature=", url_encode(r->pool, signature), NULL);
@@ -185,6 +194,8 @@ static void *create_dir_amazon_proxy_config(apr_pool_t *p, char *dummy)
     dir_config->access_key = NULL;
     dir_config->secret_key = NULL;
     dir_config->default_aid = NULL;
+    dir_config->endpoint = NULL;
+    dir_config->xslt_endpoint = NULL;
 
     return (void *)dir_config;
 }
@@ -217,12 +228,20 @@ static const char *set_amazonendpoint(cmd_parms *cmd, void *in_dir_config, const
     return NULL;
 }
 
+static const char *set_amazonxsltendpoint(cmd_parms *cmd, void *in_dir_config, const char *xslt_endpoint)
+{
+    amazon_proxy_dir_config *dir_config = in_dir_config;
+    dir_config->xslt_endpoint = xslt_endpoint;
+    return NULL;
+}
+
 static const command_rec amazon_proxy_cmds[] =
 {
     AP_INIT_TAKE1("AmazonAccessKey", set_amazonaccesskey, NULL, OR_LIMIT, "your access key for amazon api"),
     AP_INIT_TAKE1("AmazonSecretKey", set_amazonsecretkey, NULL, OR_LIMIT, "your secret key for amazon api"),
     AP_INIT_TAKE1("AmazonDefaultAid", set_amazondefaultaid, NULL, OR_LIMIT, "your aid if you want"),
     AP_INIT_TAKE1("AmazonEndPoint", set_amazonendpoint, NULL, OR_LIMIT, "amazon api end point"),
+    AP_INIT_TAKE1("AmazonXsltEndPoint", set_amazonxsltendpoint, NULL, OR_LIMIT, "amazon xslt end point"),
     { NULL }
 };
 

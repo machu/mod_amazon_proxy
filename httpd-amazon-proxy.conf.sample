@@ -6,6 +6,7 @@ LoadModule amazon_proxy_module modules/mod_amazon_proxy.so
 	AmazonSecretKey your_secret_key
 	# AmazonDefaultAid your_aid_if_you_want  # optional
 	AmazonEndPoint ecs.amazonaws.ca
+	AmazonXsltEndPoint xml-ca.amznxslt.com
 	SetHandler amazon_proxy
 </Location>
 
@@ -14,6 +15,7 @@ LoadModule amazon_proxy_module modules/mod_amazon_proxy.so
 	AmazonSecretKey your_secret_key
 	# AmazonDefaultAid your_aid_if_you_want  # optional
 	AmazonEndPoint ecs.amazonaws.de
+	AmazonXsltEndPoint xml-de.amznxslt.com
 	SetHandler amazon_proxy
 </Location>
 
@@ -22,6 +24,7 @@ LoadModule amazon_proxy_module modules/mod_amazon_proxy.so
 	AmazonSecretKey your_secret_key
 	# AmazonDefaultAid your_aid_if_you_want  # optional
 	AmazonEndPoint ecs.amazonaws.fr
+	AmazonXsltEndPoint xml-fr.amznxslt.com
 	SetHandler amazon_proxy
 </Location>
 
@@ -30,6 +33,7 @@ LoadModule amazon_proxy_module modules/mod_amazon_proxy.so
 	AmazonSecretKey your_secret_key
 	# AmazonDefaultAid your_aid_if_you_want  # optional
 	AmazonEndPoint ecs.amazonaws.jp
+	AmazonXsltEndPoint xml-jp.amznxslt.com
 	SetHandler amazon_proxy
 </Location>
 
@@ -38,6 +42,7 @@ LoadModule amazon_proxy_module modules/mod_amazon_proxy.so
 	AmazonSecretKey your_secret_key
 	# AmazonDefaultAid your_aid_if_you_want  # optional
 	AmazonEndPoint ecs.amazonaws.co.uk
+	AmazonXsltEndPoint xml-uk.amznxslt.com
 	SetHandler amazon_proxy
 </Location>
 
@@ -46,5 +51,6 @@ LoadModule amazon_proxy_module modules/mod_amazon_proxy.so
 	AmazonSecretKey your_secret_key
 	# AmazonDefaultAid your_aid_if_you_want  # optional
 	AmazonEndPoint ecs.amazonaws.com
+	AmazonXsltEndPoint xml-us.amznxslt.com
 	SetHandler amazon_proxy
 </Location>
