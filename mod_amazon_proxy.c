@@ -19,6 +19,7 @@
 
 #include <openssl/hmac.h>
 
+#include "apr_strings.h"
 #include "httpd.h"
 #include "http_config.h"
 #include "http_protocol.h"
